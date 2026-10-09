@@ -1,1 +1,77 @@
-<!-- Add your index page here -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>After-School Detention Escape</title>
+</head>
+
+<body>
+    <header>
+        <h1>After-School Detention Escape</h1>
+        <p>An interactive story game by Isaac</p>
+
+        <a href="aboutme.html">About Isaac</a>
+    </header>
+
+    <main>
+        <h2>Prologue</h2>
+
+        <p>
+            You are hiding in the back closet of the school's west wing.
+            You can hear the janitor's keys getting closer.
+        </p>
+
+        <p>
+            The Science Olympiad trophy has gone missing, and you are holding
+            the evidence. The whole team is relying on you.
+        </p>
+        <img src="Trophy.jpg" alt="Science Olympiad Trophy" width="100">
+
+        <p>
+            Do you break through the door and run, or crawl through the air vents?
+        </p>
+        
+
+        <h2>Begin the Escape</h2>
+
+        <form action="game.html" method="get">
+            <label for="name">Enter your name:</label>
+            <input type="text" id="name" name="name" required>
+
+            <br><br>
+
+            <label for="role">Choose your role:</label>
+            <select id="role" name="role">
+                <option value="team-member">Science Olympiad Team Member</option>
+                <option value="leader">Team Leader</option>
+                <option value="helper">Team Helper</option>
+            </select>
+
+            <p>How will you escape?</p>
+
+            <input type="radio" id="door" name="escape" value="door" required>
+            <label for="door">Bust the door open and run</label>
+
+            <br>
+
+            <input type="radio" id="vents" name="escape" value="vents">
+            <label for="vents">Climb into the air vents</label>
+
+            <br><br>
+
+            <label for="reason">Why did you choose this escape plan?</label>
+            <br>
+            <textarea id="reason" name="reason" rows="4" cols="40"></textarea>
+
+            <br><br>
+
+            <button type="submit">Start the Escape</button>
+        </form>
+    </main>
+
+    <footer>
+        <p>Created by Isaac.</p>
+    </footer>
+</body>
+</html>
