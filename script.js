@@ -1,12 +1,13 @@
+
 // GAME VARIABLES
 let currentScene = "westWing";
 let suspicion = 0;
 let inventory = [];
 let ventLoops = 0;
-let gameOver = false;
+let gameOver = true;
+let onHomeScreen = true;
 
 // SEVEN LOCATIONS
-// Every location uses title, character, text, choices.
 const scenes = {
   westWing: {
     title: "The West Wing Storage Closet",
@@ -167,13 +168,56 @@ const inventoryDisplay = document.getElementById("inventory-display");
 const messageDisplay = document.getElementById("message-display");
 const restartButton = document.getElementById("restart-button");
 
+// HOME SCREEN
+function showHomeScreen() {
+  onHomeScreen = true;
+
+  sceneTitle.textContent = "The Great School Escape";
+  characterName.textContent = "Science Olympiad Mission";
+  sceneText.textContent =
+    "The missing Science Olympiad trophy must be recovered. " +
+    "Find your Hall Pass, retrieve the trophy, and escape " +
+    "without raising too much suspicion.";
+
+  messageDisplay.textContent = "";
+  choicesContainer.replaceChildren();
+
+  const startButton = document.createElement("button");
+
+  if (gameOver) {
+    startButton.textContent = "Start Game";
+    startButton.addEventListener("click", restartGame);
+  } else {
+    startButton.textContent = "Resume Game";
+    startButton.addEventListener("click", function () {
+      updateScene(currentScene);
+    });
+  }
+
+  choicesContainer.appendChild(startButton);
+
+  const resetButton = document.createElement("button");
+  resetButton.textContent = "Go back to home page";
+
+  resetButton.addEventListener("click", function () {
+    window.location.assign("./index.html");
+  });
+
+  choicesContainer.appendChild(resetButton);
+}
 
 // UPDATE SCENE
-
 function updateScene(sceneName) {
   if (gameOver) return;
 
+  if (!scenes[sceneName]) {
+    messageDisplay.textContent = "Error: This location does not exist.";
+    return;
+  }
+
   currentScene = sceneName;
+  onHomeScreen = false;
+
   const scene = scenes[sceneName];
 
   sceneTitle.textContent = scene.title;
@@ -183,19 +227,17 @@ function updateScene(sceneName) {
   choicesContainer.replaceChildren();
   messageDisplay.textContent = "";
 
-  // Loop through every choice and create its button.
   scene.choices.forEach(function (choice) {
     const button = document.createElement("button");
     button.textContent = choice.text;
 
     button.addEventListener("click", function () {
-      if (gameOver) return;
+      if (gameOver || onHomeScreen) return;
 
       if (choice.action) {
         choice.action();
       }
 
-      // An action can end the game or change the scene itself.
       if (choice.nextScene && !gameOver) {
         updateScene(choice.nextScene);
       }
@@ -203,30 +245,40 @@ function updateScene(sceneName) {
 
     choicesContainer.appendChild(button);
   });
+
+  const homeButton = document.createElement("button");
+  homeButton.textContent = "Home Screen";
+  homeButton.addEventListener("click", showHomeScreen);
+  choicesContainer.appendChild(homeButton);
 }
 
-
-// NUMERICAL STAT: SUSPICION
-
+// SUSPICION
 function updateSuspicion(amount) {
   suspicion = Math.max(0, Math.min(100, suspicion + amount));
-  healthDisplay.textContent = suspicion;
 
-  if (suspicion >= 75) {
+  if (healthDisplay) {
+    healthDisplay.textContent = suspicion;
+  }
+
+  if (suspicion >= 100) {
+    finishEnding("caught");
+  } else if (suspicion >= 75) {
     messageDisplay.textContent =
       "WARNING: Suspicion is high! The school staff are becoming alert.";
-  } else {
+  } else if (amount !== 0) {
     messageDisplay.textContent =
       "Suspicion increased to " + suspicion + "/100.";
+  } else if (healthDisplay) {
+    healthDisplay.textContent = suspicion;
   }
 }
 
-
 // INVENTORY
-
 function updateInventory() {
-  inventoryDisplay.textContent =
-    inventory.length > 0 ? inventory.join(", ") : "Empty";
+  if (inventoryDisplay) {
+    inventoryDisplay.textContent =
+      inventory.length > 0 ? inventory.join(", ") : "Empty";
+  }
 }
 
 function pickUpItem(itemName) {
@@ -242,10 +294,7 @@ function pickUpItem(itemName) {
   messageDisplay.textContent = "Collected: " + itemName + "!";
 }
 
-
-// CONDITIONAL: GET THE TROPHY
-// The Student ID Badge unlocks the case.
-
+// GET THE TROPHY
 function getTrophy() {
   if (!inventory.includes("Student ID Badge")) {
     messageDisplay.textContent =
@@ -264,9 +313,7 @@ function getTrophy() {
     "The badge releases the case lock. You recover the missing Science Olympiad trophy!";
 }
 
-// CONDITIONAL: EXIT THROUGH SECURITY
-// Hall Pass + trophy = true ending.
-// No Hall Pass = bad ending.
+// EXIT THROUGH SECURITY
 function attemptExit() {
   if (!inventory.includes("Hall Pass")) {
     finishEnding("bad");
@@ -282,7 +329,7 @@ function attemptExit() {
   finishEnding("true");
 }
 
-// CONDITIONAL: SIDE GATE
+// SIDE GATE
 function escapeSideGate() {
   if (
     inventory.includes("Hall Pass") &&
@@ -295,11 +342,11 @@ function escapeSideGate() {
   }
 }
 
-// THREE ENDINGS
-// Endings are displayed dynamically and are
-// not additional location entries in scenes.
+// ENDINGS
 function finishEnding(ending) {
   gameOver = true;
+  onHomeScreen = false;
+
   choicesContainer.replaceChildren();
   messageDisplay.textContent = "";
 
@@ -307,41 +354,75 @@ function finishEnding(ending) {
     sceneTitle.textContent = "Ending 1: Clean Getaway";
     characterName.textContent = "Mission Accomplished";
     sceneText.textContent =
-      "You breeze past the front doors with your valid Hall Pass. Vice Principal Vance raises an eyebrow, sighs, and waves you through. \"Just make sure this is turned in tomorrow,\" he mutters. The Science Olympiad trophy is safely tucked in your backpack, and your team's project is saved. The cool evening air hits your face as you walk home under the twilight sky. You pulled off the ultimate after-school escape!";
+      "You breeze past the front doors with your valid Hall Pass. " +
+      "Vice Principal Vance raises an eyebrow, sighs, and waves you through. " +
+      "\"Just make sure this is turned in tomorrow,\" he mutters. " +
+      "The Science Olympiad trophy is safely tucked in your backpack, " +
+      "and your team's project is saved. The cool evening air hits your " +
+      "face as you walk home under the twilight sky. You pulled off " +
+      "the ultimate after-school escape!";
+
   } else if (ending === "bad") {
     sceneTitle.textContent = "Ending 2: Caught in the Act";
     characterName.textContent = "Vice Principal Vance";
-    sceneText =
-      "\"Nice try,\" Vance says, grabbing you by the shoulder before you can escape. You tried to leave without a Hall Pass, and now you're caught. The next morning, your name is announced over the PA system, and you spend the entire week scrubbing the cafeteria floors. The trophy goes back on its shelf, and your reputation as a master escape artist is ruined.";
+    sceneText.textContent =
+      "\"Nice try,\" Vance says, stopping you before you can escape. " +
+      "You tried to leave without a Hall Pass, and now you're caught. " +
+      "The next morning, your name is announced over the PA system, " +
+      "and you spend the entire week scrubbing the cafeteria floors. " +
+      "The trophy goes back on its shelf, and your reputation as a " +
+      "master escape artist is ruined.";
+
+  } else if (ending === "caught") {
+    sceneTitle.textContent = "Ending 3: Busted!";
+    characterName.textContent = "Vice Principal Vance";
+    sceneText.textContent =
+      "Your suspicion level has reached its maximum. The school staff " +
+      "have figured out what you are doing, and Vice Principal Vance " +
+      "catches you before you can finish your mission. Your escape " +
+      "attempt is over!";
+
   } else {
-    sceneTitle.textContent = "Ending 3: Lost in the Metal Maze";
+    sceneTitle.textContent = "Ending 4: Lost in the Metal Maze";
     characterName.textContent = "The School's New Urban Legend";
-    sceneText =
-      "You take one wrong turn too many in the dark metal tubes above the school. Hours pass, and the school lights click off one by one. With no way down and no way out, you become a permanent urban legend of the school: the ghost who lives in the air vents.";
+    sceneText.textContent =
+      "You take one wrong turn too many in the dark metal tubes above " +
+      "the school. Hours pass, and the school lights click off one by " +
+      "one. With no way down and no way out, you become a permanent " +
+      "urban legend of the school: the ghost who lives in the air vents.";
   }
 
-  const restartButtonEnding = document.createElement("button");
-  restartButtonEnding.textContent = "Play Again";
-  restartButtonEnding.addEventListener("click", restartGame);
-  choicesContainer.appendChild(restartButtonEnding);
+  const playAgainButton = document.createElement("button");
+  playAgainButton.textContent = "Play Again";
+  playAgainButton.addEventListener("click", restartGame);
+  choicesContainer.appendChild(playAgainButton);
+
+  const homeButton = document.createElement("button");
+  homeButton.textContent = "Home Screen";
+  homeButton.addEventListener("click", showHomeScreen);
+  choicesContainer.appendChild(homeButton);
 }
 
-// RESTART
+// RESTART GAME
 function restartGame() {
   currentScene = "westWing";
   suspicion = 0;
   inventory = [];
   ventLoops = 0;
   gameOver = false;
+  onHomeScreen = false;
 
   updateSuspicion(0);
   updateInventory();
   updateScene(currentScene);
 }
 
-restartButton.addEventListener("click", restartGame);
+// EXISTING HTML RESTART BUTTON
+if (restartButton) {
+  restartButton.addEventListener("click", restartGame);
+}
 
-// START THE GAME
+// START AT HOME SCREEN
 updateSuspicion(0);
 updateInventory();
-updateScene(currentScene);
+showHomeScreen();
