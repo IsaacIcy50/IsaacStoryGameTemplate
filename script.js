@@ -1,147 +1,202 @@
+// GAME VARIABLES
+let currentScene = "westWing";
+let suspicion = 0;
+let inventory = [];
+let ventLoops = 0;
+let gameOver = false;
 
-// --------------------------------------------------
-// SCENES
-// Read through the comments below to see what this section does
-//
-// TO CUSTOMIZE THIS SECTION
-// 1) add fields for each scene, as relevant, to match your mockup
-// 2) customize the scenes to fit your story
-// 3) add any new fields to the function below
-// --------------------------------------------------
-
-// First, we create a variable for the current scene being displayed
-let currentScene = "backyard";
-
-// Then, we create an object that stores the data for each scene,
+// SEVEN LOCATIONS
+// Every location uses title, character, text, choices.
 const scenes = {
-  // See "backyard" for the first example
-  backyard: {
-    title: "Location: Backyard",
-    character: "Interviewee:Grandma",
-    text: "Text: well what I remember happening is that Darcie went inside to play with her pretend kitchen, I heard her neighbor mention he was really hungry, and the dog ran around really quickly",
-    // you can choose how many choices to include
-    // each choice can have text, an action, and/or nextScene
+  westWing: {
+    title: "The West Wing Storage Closet",
+    character: "You — the Science Olympiad team member",
+    text: "You are backed into the very back closet of the west wing. Through the wooden door slats, you hear the janitor's keys jingling in the hallway to your left. The whole team is relying on you. A rusted metal grate hangs loosely overhead. Behind a jar of paste, you spot an official Hall Pass.",
     choices: [
       {
-        text: "Chase after the dog (-10 HP)",
+        text: "Take the Hall Pass",
         action: function () {
-          updateHealth(-10);
+          pickUpItem("Hall Pass");
+        }
+      },
+      {
+        text: "Bust the door open and run to the Main Hallway (+25 suspicion)",
+        action: function () {
+          updateSuspicion(25);
         },
-        nextScene: "entrance"
+        nextScene: "mainHallway"
       },
       {
-        text: "Ask about the neighbor",
-        nextScene: "hallway"
-      },
-      {
-          text: "Pick up the brass key",
-          action: function () {
-            pickUpItem("brass key");
-          },
-          nextScene: "hallway"
+        text: "Climb into the ceiling vent",
+        nextScene: "ventilation"
       }
     ]
   },
 
-  entrance: {
-    title: "Location: Entrance",
-    character: "Interviewee:Neighbor",
-    text: "well what I remember...",
+  mainHallway: {
+    title: "The Main Hallway",
+    character: "You",
+    text: "Green lockers line the long, wax-shined corridor. Fluorescent lights buzz overhead, and framed student art hangs on the walls. The front doors are guarded by Vice Principal Vance. Locker 104 is slightly ajar, and something inside catches your eye.",
     choices: [
       {
-        text: "Ask about the dog",
-        nextScene: "backyard"
-      },
-         {
-        text: "Ask about the neighbor",
-        nextScene: "hallway"
-      }
-    ]
-  },
-
-  hallway: {
-    title: "The Hallway",
-    text: "The hallway is dark and silent.",
-    choices: [
-      {
-        text: "backyard",
-        nextScene: "lockedDoor"
-      }
-    ]
-  },
-
-   lockedDoor: {
-    title: "The Locked Door",
-    text: "The door handle doesn't move.",
-    choices: [
-      {
-        text: "Try to open it",
-        action: unlockDoor
+        text: "Check locker 104 for the Student ID Badge",
+        action: function () {
+          pickUpItem("Student ID Badge");
+        }
       },
       {
-        text: "Go back",
-        nextScene: "backyard"
+        text: "Head toward the front Exit Doors",
+        nextScene: "exitDoors"
+      },
+      {
+        text: "Return to the West Wing Storage Closet",
+        nextScene: "westWing"
       }
     ]
   },
 
-   solution: {
-    title: "The solution",
-    text: "You solved the mystery!",
-    
+  ventilation: {
+    title: "The Ventilation Network",
+    character: "You",
+    text: "You crawl through a narrow, dark metal tube above the school ceiling. Dust floats through thin beams of light. Through a grate, you spot Mr. Henderson setting up tomorrow's chemistry demonstration in the Science Lab. Farther ahead, an exit hatch leads toward the Gymnasium Balcony.",
+    choices: [
+      {
+        text: "Find the east wing exit hatch",
+        nextScene: "gymBalcony"
+      },
+      {
+        text: "Drop through the grate into the Science Lab (+10 suspicion)",
+        action: function () {
+          updateSuspicion(10);
+        },
+        nextScene: "scienceLab"
+      },
+      {
+        text: "Keep crawling deeper into the vents",
+        action: function () {
+          ventLoops++;
+
+          if (ventLoops >= 4) {
+            finishEnding("secret");
+          } else {
+            messageDisplay.textContent =
+              "You crawl deeper, but the tunnels look familiar. Vent loop " +
+              ventLoops + " of 4. Find an exit before you get lost!";
+          }
+        }
+      }
+    ]
+  },
+
+  scienceLab: {
+    title: "The Science Lab",
+    character: "You",
+    text: "Rows of black lab tables, Bunsen burners, and glass beakers fill the room. An aquarium bubbles quietly in the corner. Under a locked glass case rests the missing Science Olympiad trophy. The case needs an authorized Student ID Badge to release its lock.",
+    choices: [
+      {
+        text: "Try to open the trophy case",
+        action: getTrophy
+      },
+      {
+        text: "Use the back exit to reach the Courtyard",
+        nextScene: "courtyard"
+      },
+      {
+        text: "Climb back into the ventilation network",
+        nextScene: "ventilation"
+      }
+    ]
+  },
+
+  gymBalcony: {
+    title: "The Gymnasium Balcony",
+    character: "You",
+    text: "You emerge onto a dusty metal catwalk overlooking the echoing gymnasium. Basketball practice is wrapping up below. The coaches are distracted by a scrimmage, leaving a clear route down the bleachers toward the front doors.",
+    choices: [
+      {
+        text: "Descend the bleachers toward the Exit Doors",
+        nextScene: "exitDoors"
+      },
+      {
+        text: "Return to the Ventilation Network",
+        nextScene: "ventilation"
+      }
+    ]
+  },
+
+  courtyard: {
+    title: "The Courtyard",
+    character: "You",
+    text: "You enter an open-air quad surrounded by brick academic buildings. A fountain trickles in the center, and rose bushes have grown wild along the path. The main gates are chained shut, but the side gate near the bicycle racks appears unlatched.",
+    choices: [
+      {
+        text: "Try to escape through the side gate",
+        action: escapeSideGate
+      },
+      {
+        text: "Return to the Science Lab",
+        nextScene: "scienceLab"
+      }
+    ]
+  },
+
+  exitDoors: {
+    title: "The Exit Doors",
+    character: "Vice Principal Vance",
+    text: "The heavy glass doors stand between you and freedom. Vice Principal Vance blocks the exit with a clipboard in hand. He looks directly at you. \"Hold right there, student. Where is your pass?\" You must decide whether to present your Hall Pass or turn back.",
+    choices: [
+      {
+        text: "Present your Hall Pass and attempt to leave",
+        action: attemptExit
+      },
+      {
+        text: "Turn around and run back into the school",
+        nextScene: "mainHallway"
+      }
+    ]
   }
 };
 
-// --------------------------------------------------
-// UPDATE SCENES
-// Read through the comments below to see what this section does
-//
-// TO CUSTOMIZE THIS SECTION
-// 1) add a new const variable for each new field you added above
-// Make sure to match the ids used in your mock up with the fields 
-// 2) set the .textContent of each variable to the corresponding field in the scene object
-// Use sceneTitle as a model
-// --------------------------------------------------
-
-// First, we create variables to hold the references to the HTML elements
-// Technically you could just use document.getElementById('id-name') 
-// in the function itself, but that would be very wordy 
-// and make the code harder to read
+// HTML ELEMENT REFERENCES
 const sceneTitle = document.getElementById("scene-title");
+const characterName = document.getElementById("character-name");
 const sceneText = document.getElementById("scene-text");
 const choicesContainer = document.getElementById("choices-container");
-const characterName = document.getElementById("character-name");
+const healthDisplay = document.getElementById("health-display");
+const inventoryDisplay = document.getElementById("inventory-display");
+const messageDisplay = document.getElementById("message-display");
+const restartButton = document.getElementById("restart-button");
 
-// Then, we create a function to update the scene,
+
+// UPDATE SCENE
+
 function updateScene(sceneName) {
+  if (gameOver) return;
 
-  //This update the variable currentScene with the new scene passed as a parameter
   currentScene = sceneName;
-
-  //This accesses the scene object based on the scene name
   const scene = scenes[sceneName];
 
-  // Here, for each html element, you change the textContent to match
-  // the appropriate text from the scene object
   sceneTitle.textContent = scene.title;
-  sceneText.textContent = scene.text;
   characterName.textContent = scene.character;
+  sceneText.textContent = scene.text;
 
-  // Clear the old buttons before creating new ones
-  choicesContainer.innerHTML = "";
+  choicesContainer.replaceChildren();
+  messageDisplay.textContent = "";
 
-  // Loop through each choice in the scene, connecting an action and nextScene if included
+  // Loop through every choice and create its button.
   scene.choices.forEach(function (choice) {
     const button = document.createElement("button");
-
     button.textContent = choice.text;
 
     button.addEventListener("click", function () {
+      if (gameOver) return;
+
       if (choice.action) {
         choice.action();
       }
 
-      if (choice.nextScene) {
+      // An action can end the game or change the scene itself.
+      if (choice.nextScene && !gameOver) {
         updateScene(choice.nextScene);
       }
     });
@@ -150,69 +205,143 @@ function updateScene(sceneName) {
   });
 }
 
-// This updates the screen with the current scene
-updateScene(currentScene);
 
+// NUMERICAL STAT: SUSPICION
 
-// --------------------------------------------------
-// HEALTH
-// Read through the comments below to see what this section does
-//
-// TO CUSTOMIZE THIS SECTION
-// Either customize the name from health to steps, stress, etc...
-// OR
-// create a copy of each step for each additional state you want to track throughout the game
-// --------------------------------------------------
+function updateSuspicion(amount) {
+  suspicion = Math.max(0, Math.min(100, suspicion + amount));
+  healthDisplay.textContent = suspicion;
 
-// Create a variable for health
-let health = 100;
-
-// Display current health
-const healthDisplay = document.getElementById("health-display");
-
-// Create a function to update health 
-function updateHealth(amount) {
-  health += amount;
-  healthDisplay.textContent = health;
-}
-
-// This refreshes the health display
-updateHealth(0);
-
-// --------------------------------------------------
-// INVENTORY
-// Read through the comments below to see what this section does
-//
-// For now, you are probably leaving this section as is. 
-// --------------------------------------------------
-
-// Create a variable for inventory
-let inventory = [];
-
-// Display current inventory
-const inventoryDisplay = document.querySelector("#inventory-display");
-const messageDisplay = document.getElementById("message-display");
-
-// Create a function to update inventory 
-function pickUpItem(itemName) {
-    // Add itemName to the inventory array
-    // Show the updated inventory on the page
-  inventory.push(itemName);
-  inventoryDisplay.textContent = inventory.join(", ");
-}
-
-// --------------------------------------------------
-// CONDITIONAL 
-// Depending on how you want to implement the conditional logic, you may 
-// simply adjust the names below or you may need to expand upon this section
-// --------------------------------------------------
-
-// Create a function that checks if the inventory contains one item and if so shows the win condition scene.
-function unlockDoor() {
-  if (inventory.includes("brass key")) {
-    updateScene("solution");
+  if (suspicion >= 75) {
+    messageDisplay.textContent =
+      "WARNING: Suspicion is high! The school staff are becoming alert.";
   } else {
-    messageDisplay.textContent = "The door is locked.";
+    messageDisplay.textContent =
+      "Suspicion increased to " + suspicion + "/100.";
   }
 }
 
+
+// INVENTORY
+
+function updateInventory() {
+  inventoryDisplay.textContent =
+    inventory.length > 0 ? inventory.join(", ") : "Empty";
+}
+
+function pickUpItem(itemName) {
+  if (inventory.includes(itemName)) {
+    messageDisplay.textContent =
+      "You already have the " + itemName + ".";
+    return;
+  }
+
+  inventory.push(itemName);
+  updateInventory();
+
+  messageDisplay.textContent = "Collected: " + itemName + "!";
+}
+
+
+// CONDITIONAL: GET THE TROPHY
+// The Student ID Badge unlocks the case.
+
+function getTrophy() {
+  if (!inventory.includes("Student ID Badge")) {
+    messageDisplay.textContent =
+      "The glass case is locked. Find the Student ID Badge in locker 104 first.";
+    return;
+  }
+
+  if (inventory.includes("Science Olympiad Trophy")) {
+    messageDisplay.textContent =
+      "You already have the Science Olympiad trophy.";
+    return;
+  }
+
+  pickUpItem("Science Olympiad Trophy");
+  messageDisplay.textContent =
+    "The badge releases the case lock. You recover the missing Science Olympiad trophy!";
+}
+
+// CONDITIONAL: EXIT THROUGH SECURITY
+// Hall Pass + trophy = true ending.
+// No Hall Pass = bad ending.
+function attemptExit() {
+  if (!inventory.includes("Hall Pass")) {
+    finishEnding("bad");
+    return;
+  }
+
+  if (!inventory.includes("Science Olympiad Trophy")) {
+    messageDisplay.textContent =
+      "Vance checks your pass and lets you approach the doors, but you still need to recover the missing Science Olympiad trophy. Get back inside and find it!";
+    return;
+  }
+
+  finishEnding("true");
+}
+
+// CONDITIONAL: SIDE GATE
+function escapeSideGate() {
+  if (
+    inventory.includes("Hall Pass") &&
+    inventory.includes("Science Olympiad Trophy")
+  ) {
+    finishEnding("true");
+  } else {
+    messageDisplay.textContent =
+      "You reach the side gate, but you still need both the Hall Pass and the missing trophy to complete your mission. Return to the building and finish the job.";
+  }
+}
+
+// THREE ENDINGS
+// Endings are displayed dynamically and are
+// not additional location entries in scenes.
+function finishEnding(ending) {
+  gameOver = true;
+  choicesContainer.replaceChildren();
+  messageDisplay.textContent = "";
+
+  if (ending === "true") {
+    sceneTitle.textContent = "Ending 1: Clean Getaway";
+    characterName.textContent = "Mission Accomplished";
+    sceneText.textContent =
+      "You breeze past the front doors with your valid Hall Pass. Vice Principal Vance raises an eyebrow, sighs, and waves you through. \"Just make sure this is turned in tomorrow,\" he mutters. The Science Olympiad trophy is safely tucked in your backpack, and your team's project is saved. The cool evening air hits your face as you walk home under the twilight sky. You pulled off the ultimate after-school escape!";
+  } else if (ending === "bad") {
+    sceneTitle.textContent = "Ending 2: Caught in the Act";
+    characterName.textContent = "Vice Principal Vance";
+    sceneText =
+      "\"Nice try,\" Vance says, grabbing you by the shoulder before you can escape. You tried to leave without a Hall Pass, and now you're caught. The next morning, your name is announced over the PA system, and you spend the entire week scrubbing the cafeteria floors. The trophy goes back on its shelf, and your reputation as a master escape artist is ruined.";
+  } else {
+    sceneTitle.textContent = "Ending 3: Lost in the Metal Maze";
+    characterName.textContent = "The School's New Urban Legend";
+    sceneText =
+      "You take one wrong turn too many in the dark metal tubes above the school. Hours pass, and the school lights click off one by one. With no way down and no way out, you become a permanent urban legend of the school: the ghost who lives in the air vents.";
+  }
+
+  const restartButtonEnding = document.createElement("button");
+  restartButtonEnding.textContent = "Play Again";
+  restartButtonEnding.addEventListener("click", restartGame);
+  choicesContainer.appendChild(restartButtonEnding);
+}
+
+// RESTART
+function restartGame() {
+  currentScene = "westWing";
+  suspicion = 0;
+  inventory = [];
+  ventLoops = 0;
+  gameOver = false;
+
+  updateSuspicion(0);
+  updateInventory();
+  updateScene(currentScene);
+}
+
+restartButton.addEventListener("click", restartGame);
+
+// START THE GAME
+updateSuspicion(0);
+updateInventory();
+updateScene(currentScene);

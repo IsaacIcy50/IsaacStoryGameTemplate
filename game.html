@@ -1,60 +1,43 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Game Info</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>After-School Detention Escape</title>
+    <link rel="stylesheet" href="style.css">
     <script src="script.js" defer></script>
-
 </head>
+
 <body>
     <header>
-      <nav>
-            <ul> 
-                <li><a href="index.html">Home</a></li>
-            </ul>
-            <ul> 
-                <li><a href="game.html">Play the game</a></li>
-            </ul>
-            <ul> 
-                <li><a href="about.html">About the creator</a></li>
-            </ul>
-        </nav>
+        <h1>After-School Detention Escape</h1>
+        <p>Find the trophy. Avoid detention. Make it out.</p>
     </header>
 
     <main>
-    <header>
-        <h1 id="scene-title">  </h1>
-        <h2 id="character-name">  </h2>
-    </header>
-    
-    <section>
-    <p id="scene-text">     </p>
+        <section class="status-panel" aria-label="Player status">
+            <p>Suspicion: <strong id="health-display">0</strong>/100</p>
+            <p>Inventory: <strong id="inventory-display">Empty</strong></p>
+        </section>
 
-    </section>
+        <section class="story-panel" aria-live="polite">
+            <p class="eyebrow">YOUR STORY</p>
+            <h2 id="scene-title"></h2>
+            <h3 id="character-name"></h3>
+            <p id="scene-text"></p>
+            <div id="choices-container" class="choices"></div>
+            <p id="message-display" role="status"></p>
+        </section>
 
-    <section>
-        <div id="choices-container"> </div>
-    </section>   
-        
-    <section>
-        <p> Current HP:</p>
-        <ul>
-            <li id="health-display"> 100</li>
-        </ul>
-
-        <p> Inventory:</p>
-        <ul>
-            <li id="inventory-display"> </li>
-        </ul>
-
-        <p id="message-display"></p>
-    </section>
-
-
+        <button id="restart-button" class="restart-button" type="button">
+            Restart Escape
+        </button>
     </main>
-    <footer>
 
+    <footer>
+        <p>Science Olympiad needs you. Choose carefully.</p>
     </footer>
 </body>
+
 </html>
