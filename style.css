@@ -151,3 +151,52 @@ footer {
         padding: 20px;
     }
 }
+
+
+
+* {
+    box-sizing: border-box;
+}
+
+body {
+    margin: 0;
+    min-height: 100vh;
+    background: #111827;
+    color: #e5e7eb;
+    /* Custom font for body text */
+    font-family: "Sofia", sans-serif;
+    line-height: 1.65;
+}
+
+header {
+    padding: 28px 18px;
+    text-align: center;
+    background: #172554;
+    border-bottom: 3px solid #eab308;
+}
+
+header h1 {
+    margin: 0;
+    color: #fde68a;
+    /* Custom font for the title */
+    font-family: "Audiowide", sans-serif;
+    font-size: clamp(1.8rem, 5vw, 2.8rem);
+}
+
+/* ... keep the rest of your existing style.css code below ... */
+
+button {
+    width: 100%;
+    padding: 13px 16px;
+    border: 1px solid #d4a800;
+    border-radius: 8px;
+    background: #854d0e;
+    color: #fff;
+    /* Custom font for buttons */
+    font-family: "Audiowide", sans-serif;
+    font-size: 1rem;
+    font-weight: bold;
+    text-align: left;
+    cursor: pointer;
+    transition: background 0.15s ease;
+}
